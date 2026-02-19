@@ -220,18 +220,18 @@ export type SpecialtyOrderByWithRelationInput = {
 }
 
 export type SpecialtyWhereUniqueInput = Prisma.AtLeast<{
+  id?: string
   title?: string
   AND?: Prisma.SpecialtyWhereInput | Prisma.SpecialtyWhereInput[]
   OR?: Prisma.SpecialtyWhereInput[]
   NOT?: Prisma.SpecialtyWhereInput | Prisma.SpecialtyWhereInput[]
-  id?: Prisma.StringFilter<"Specialty"> | string
   description?: Prisma.StringNullableFilter<"Specialty"> | string | null
   icon?: Prisma.StringNullableFilter<"Specialty"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Specialty"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Specialty"> | Date | string
   isDeleted?: Prisma.BoolFilter<"Specialty"> | boolean
   deletedAt?: Prisma.DateTimeNullableFilter<"Specialty"> | Date | string | null
-}, "title">
+}, "id" | "title">
 
 export type SpecialtyOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
