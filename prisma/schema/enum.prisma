@@ -1,12 +1,17 @@
-enum Role{
+enum Role {
   SUPER_ADMIN
   ADMIN
   DOCTOR
   PATIENT
 }
 
-enum UserStatus{
+enum UserStatus {
   BLOCKED
   DELETED
   ACTIVE
+}
+
+enum Gender {
+  MALE
+  FEMALE
 }
