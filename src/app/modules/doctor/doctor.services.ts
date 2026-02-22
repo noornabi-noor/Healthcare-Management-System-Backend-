@@ -1,3 +1,5 @@
+import status from "http-status";
+import AppError from "../../errorHelpers/AppError";
 import { prisma } from "../../lib/prisma";
 import { IDoctorUpdatePayload } from "./doctor.interface";
 
@@ -53,7 +55,8 @@ const updateDoctor = async (
     });
 
     if (emailExist) {
-      throw new Error("User with this email already exists!");
+      // throw new Error("User with this email already exists!");
+      throw new AppError(status.BAD_REQUEST, "User with this email already exists!");
     }
   }
 
@@ -111,7 +114,8 @@ const deleteDoctor = async (doctorId: string) => {
 
   // already deleted check (optional but good practice)
   if (existDoctor.isDeleted) {
-    throw new Error("Doctor already deleted!");
+    // throw new Error("Doctor already deleted!");
+    throw new AppError(status.BAD_REQUEST, "Doctor already deleted!");
   }
 
   const result = await prisma.$transaction(async (tx) => {
