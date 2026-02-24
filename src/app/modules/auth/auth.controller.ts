@@ -10,39 +10,50 @@ const registerPatient = catchAsync(async (req: Request, res: Response) => {
 
   const result = await authServices.registerPatient(payload);
 
+  const { accessToken, refreshToken, token, ...rest } = result;
+
+  tokenUtils.setAccessTokenCookie(res, accessToken);
+  tokenUtils.setRefreshTokenCookie(res, refreshToken);
+  tokenUtils.setBetterAuthSessionCookie(res, token as string);
+
   sendResponse(res, {
     httpStatusCode: 201,
     success: true,
     message: "Patient registered successfully",
-    data: result,
+    data: {
+      token,
+      accessToken,
+      refreshToken,
+      ...rest,
+    },
   });
 });
 
 const signInPatient = catchAsync(async (req: Request, res: Response) => {
-    const payload = req.body;
+  const payload = req.body;
 
-    const result = await authServices.loginPatient(payload);
+  const result = await authServices.loginPatient(payload);
 
-    const {accessToken, refreshToken, token, ...rest} = result;
+  const { accessToken, refreshToken, token, ...rest } = result;
 
-    tokenUtils.setAccessTokenCookie(res, accessToken);
-    tokenUtils.setRefreshTokenCookie(res, refreshToken);
-    tokenUtils.setBetterAuthSessionCookie(res, token);
+  tokenUtils.setAccessTokenCookie(res, accessToken);
+  tokenUtils.setRefreshTokenCookie(res, refreshToken);
+  tokenUtils.setBetterAuthSessionCookie(res, token);
 
-    sendResponse(res, {
-        httpStatusCode: 201,
-        success: true,
-        message: "Pateint login successfully",
-        data: {
-          token,
-          accessToken,
-          refreshToken,
-          ...rest
-        },
-    })
-})
+  sendResponse(res, {
+    httpStatusCode: 201,
+    success: true,
+    message: "Pateint login successfully",
+    data: {
+      token,
+      accessToken,
+      refreshToken,
+      ...rest,
+    },
+  });
+});
 
 export const authController = {
-    registerPatient,
-    signInPatient,
-}
+  registerPatient,
+  signInPatient,
+};
