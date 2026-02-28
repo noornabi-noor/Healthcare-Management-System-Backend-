@@ -8,7 +8,7 @@ export const catchAsync = (fn: RequestHandler) => {
       console.log(error);
       res.status(500).json({
         success: false,
-        message: "Specialty deleted failed!",
+        message: "featched failed!",
         error: error.message,
       });
     }
