@@ -5,6 +5,7 @@ import { sendResponse } from "../../shared/sendResponse";
 import { tokenUtils } from "../../utils/token";
 import status from "http-status";
 import AppError from "../../errorHelpers/AppError";
+import { cookieUtils } from "../../utils/cookie";
 
 const registerPatient = catchAsync(async (req: Request, res: Response) => {
   const payload = req.body;
@@ -92,10 +93,71 @@ const getNewToken = catchAsync(
             },
         });
     }
-)
+);
+
+const changePassword = catchAsync(async (req: Request, res: Response) => {
+  const payload = req.body;
+  const betterAuthSessionToken = req.cookies["better-auth.session_token"];
+
+  if (!betterAuthSessionToken) {
+    throw new AppError(status.UNAUTHORIZED, "Better Auth session token is missing");
+  }
+
+  const result = await authServices.changePassword(payload, betterAuthSessionToken);
+
+  const { accessToken, refreshToken, token } = result;
+
+  tokenUtils.setAccessTokenCookie(res, accessToken);
+  tokenUtils.setRefreshTokenCookie(res, refreshToken);
+  tokenUtils.setBetterAuthSessionCookie(res, token as string);
+
+  sendResponse(res, {
+    httpStatusCode: status.OK,
+    success: true,
+    message: "Password changed successfully",
+    data: result,
+  });
+});
+
+const logoutPatient = catchAsync(async (req: Request, res: Response) => {
+  const betterAuthSessionToken = req.cookies["better-auth.session_token"];
+
+  if (!betterAuthSessionToken) {
+    throw new AppError(status.UNAUTHORIZED, "Better Auth session token is missing");
+  }
+
+  const result = await authServices.logoutPatient(betterAuthSessionToken);
+
+  // Clear cookies
+  cookieUtils.clearCookie(res, "accessToken", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+  });
+  cookieUtils.clearCookie(res, "refreshToken", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+  });
+  cookieUtils.clearCookie(res, "better-auth.session_token", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+  });
+
+  sendResponse(res, {
+    httpStatusCode: status.OK,
+    success: true,
+    message: "Logged out successfully",
+    data: result,
+  });
+});
 
 export const authController = {
   registerPatient,
   signInPatient,
   getMe,
+  getNewToken,
+  changePassword,
+  logoutPatient,
 };
