@@ -238,6 +238,18 @@ const changePassword = async (payload: IChangePasswordPayload, sessionToken: str
     }),
   });
 
+  if (session.user.needPasswordChanged) {
+
+    await prisma.user.update({
+      where: {
+        id: session.user.id,
+      },
+      data: {
+        needPasswordChanged: false,
+      }
+    })
+  }
+
   const accessToken = tokenUtils.getAccessToken({
     userId: session.user.id,
     role: session.user.role,
@@ -262,7 +274,7 @@ const changePassword = async (payload: IChangePasswordPayload, sessionToken: str
     ...result,
     accessToken,
     refreshToken,
-    };
+  };
 };
 
 const logoutPatient = async (sessionToken: string) => {
@@ -270,7 +282,7 @@ const logoutPatient = async (sessionToken: string) => {
     headers: new Headers({
       Authorization: `Bearer ${sessionToken}`,
     }),
-   });
+  });
 };
 
 const verifyEmail = async (email: string, otp: string) => {
@@ -281,17 +293,88 @@ const verifyEmail = async (email: string, otp: string) => {
     },
   });
 
-  if(result.status && !result.user.emailVerified){
+  if (result.status && !result.user.emailVerified) {
     await prisma.user.update({
-      where : {
+      where: {
         email,
       },
-      data : {
-        emailVerified : true,
+      data: {
+        emailVerified: true,
       }
     })
   }
 };
+
+const forgetPassword = async (email: string) => {
+  const isUserExist = await prisma.user.findUnique({
+    where: {
+      email,
+    }
+  })
+
+  if (!isUserExist) {
+    throw new AppError(status.NOT_FOUND, "User not found");
+  }
+
+  if (!isUserExist.emailVerified) {
+    throw new AppError(status.BAD_REQUEST, "Email not verified");
+  }
+
+  if (isUserExist.isDeleted || isUserExist.status === UserStatus.DELETED) {
+    throw new AppError(status.NOT_FOUND, "User not found");
+  }
+
+  await auth.api.requestPasswordResetEmailOTP({
+    body: {
+      email,
+    }
+  })
+}
+
+const resetPassword = async (email: string, otp: string, newPassword: string) => {
+  const isUserExist = await prisma.user.findUnique({
+    where: {
+      email,
+    }
+  })
+
+  if (!isUserExist) {
+    throw new AppError(status.NOT_FOUND, "User not found");
+  }
+
+  if (!isUserExist.emailVerified) {
+    throw new AppError(status.BAD_REQUEST, "Email not verified");
+  }
+
+  if (isUserExist.isDeleted || isUserExist.status === UserStatus.DELETED) {
+    throw new AppError(status.NOT_FOUND, "User not found");
+  }
+
+  await auth.api.resetPasswordEmailOTP({
+    body: {
+      email,
+      otp,
+      password: newPassword,
+    }
+  })
+
+  if (isUserExist.needPasswordChanged) {
+    await prisma.user.update({
+      where: {
+        id: isUserExist.id,
+      },
+      data: {
+        needPasswordChanged: false,
+      }
+    })
+  }
+
+  await prisma.session.deleteMany({
+    where: {
+      userId: isUserExist.id,
+    }
+  })
+}
 
 export const authServices = {
   registerPatient,
@@ -301,4 +384,6 @@ export const authServices = {
   changePassword,
   logoutPatient,
   verifyEmail,
+  forgetPassword,
+  resetPassword,
 };
