@@ -4,8 +4,9 @@ import { envVars } from "../config/env";
 import z from "zod";
 import { TErrorResponse, TErrorSources } from "../interface/error.interface";
 import { handleZodError } from "../errorHelpers/handleZodError";
+import { deleteFileFromCloudinary } from "../config/cloudinary.config";
 
-export const globalErrorHandler = (
+export const globalErrorHandler = async (
   err: any,
   req: Request,
   res: Response,
@@ -13,6 +14,15 @@ export const globalErrorHandler = (
 ) => {
   if (envVars.NODE_ENV === "development") {
     console.log("Error from global error handler", err);
+  }
+
+  if (req.file) {
+    await deleteFileFromCloudinary(req.file.path);
+  }
+
+  if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+    const imageUrls = req.files.map((file) => file.path);
+    await Promise.all(imageUrls.map(url => deleteFileFromCloudinary(url)));
   }
 
   let errorSources: TErrorSources[] = [];
@@ -26,7 +36,7 @@ export const globalErrorHandler = (
     message = simplifiedError.message
     errorSources = [...simplifiedError.errorSources];
     stack = err.stack;
-  }else if(err instanceof Error) {
+  } else if (err instanceof Error) {
     statusCode = status.INTERNAL_SERVER_ERROR;
     message = err.message;
     stack = err.stack;
@@ -37,7 +47,7 @@ export const globalErrorHandler = (
     message: message,
     errorSources,
     error: envVars.NODE_ENV === "development" ? err : undefined,
-    stack: envVars.NODE_ENV === "development" ? stack : undefined, 
+    stack: envVars.NODE_ENV === "development" ? stack : undefined,
   };
 
   res.status(statusCode).json(errorResponse);
