@@ -3,18 +3,55 @@ import AppError from "../../errorHelpers/AppError";
 import { prisma } from "../../lib/prisma";
 import { IDoctorUpdatePayload } from "./doctor.interface";
 import { UserStatus } from "../../../generated/prisma/enums";
+import { IQueryParams } from "../../interface/query.interface";
+import { doctorFilterableFields, doctorIncludeConfig, doctorSearchableFields } from "./doctor.constant";
+import { QueryBuilder } from "../../utils/queryBuilder";
+import { Doctor, Prisma } from "../../../generated/prisma/client";
 
-const getAllDoctor = async () => {
-  return await prisma.doctor.findMany({
-    include: {
+const getAllDoctor = async (query: IQueryParams) => {
+  // return await prisma.doctor.findMany({
+  //   include: {
+  //     user: true,
+  //     specialties: {
+  //       include: {
+  //         specialty: true,
+  //       },
+  //     },
+  //   },
+  // });
+  
+  const queryBuilder = new QueryBuilder<Doctor, Prisma.DoctorWhereInput, Prisma.DoctorInclude>(
+    prisma.doctor,
+    query,
+    {
+      searchableFields: doctorSearchableFields,
+      filterableFields: doctorFilterableFields,
+    }
+  )
+
+  const result = await queryBuilder
+    .search()
+    .filter()
+    .where({
+      isDeleted: false,
+    })
+    .include({
       user: true,
+      // specialties: true,
       specialties: {
         include: {
-          specialty: true,
-        },
+          specialty: true
+        }
       },
-    },
-  });
+    })
+    .dynamicInclude(doctorIncludeConfig)
+    .paginate()
+    .sort()
+    .fields()
+    .execute();
+
+  console.log(result);
+  return result;
 };
 
 const getDoctorById = async (doctorId: string) => {
@@ -104,47 +141,6 @@ const updateDoctor = async (
   const doctor = await getDoctorById(doctorId);
   return doctor;
 };
-
-// const deleteDoctor = async (doctorId: string) => {
-//   const existDoctor = await prisma.doctor.findUniqueOrThrow({
-//     where: {
-//       id: doctorId,
-//     },
-//   });
-
-//   // already deleted check (optional but good practice)
-//   if (existDoctor.isDeleted) {
-//     // throw new Error("Doctor already deleted!");
-//     throw new AppError(status.BAD_REQUEST, "Doctor already deleted!");
-//   }
-
-//   const result = await prisma.$transaction(async (tx) => {
-//     // soft delete doctor
-//     const deletedDoctor = await tx.doctor.update({
-//       where: {
-//         id: doctorId,
-//       },
-//       data: {
-//         isDeleted: true,
-//         deletedAt: new Date(),
-//       },
-//     });
-
-//     // optional: also soft delete user
-//     await tx.user.update({
-//       where: {
-//         id: existDoctor.userId,
-//       },
-//       data: {
-//         isDeleted: true,
-//         deletedAt: new Date(),
-//       },
-//     });
-
-//     return deletedDoctor;
-//   });
-//   return result;
-// };
 
 const deleteDoctor = async (doctorId: string) => {
   const existDoctor = await prisma.doctor.findUniqueOrThrow({
