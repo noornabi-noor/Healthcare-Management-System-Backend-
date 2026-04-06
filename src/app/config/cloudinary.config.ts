@@ -9,6 +9,19 @@ cloudinary.config({
     api_secret: envVars.CLOUDINARY.CLOUDINARY_API_SECRET,
 })
 
+// Log Cloudinary initialization status with actual values for debugging
+// if (process.env.NODE_ENV === "development") {
+//     const config = cloudinary.config();
+//     console.log("🔧 Cloudinary Configuration Debug:", {
+//         env_cloud_name: envVars.CLOUDINARY.CLOUDINARY_CLOUD_NAME,
+//         env_api_key: envVars.CLOUDINARY.CLOUDINARY_API_KEY?.slice(0, 5) + "...",
+//         env_api_secret: envVars.CLOUDINARY.CLOUDINARY_API_SECRET?.slice(0, 5) + "...",
+//         loaded_cloud_name: config.cloud_name,
+//         loaded_api_key: config.api_key?.slice(0, 5) + "...",
+//         has_api_secret: !!config.api_secret,
+//     });
+// }
+
 export const uploadFileToCloudinary = async (
     buffer: Buffer,
     fileName: string,
@@ -48,14 +61,27 @@ export const uploadFileToCloudinary = async (
             },
             (error, result) => {
                 if (error) {
-                    return reject(new AppError(status.INTERNAL_SERVER_ERROR, "Failed to upload file to Cloudinary"));
+                    // Log detailed error information for debugging
+                    console.error("❌ Cloudinary Upload Error:", {
+                        http_code: error.http_code,
+                        message: error.message,
+                        status: error.status,
+                        name: error.name,
+                        full_error: error
+                    });
+                    
+                    // Check for 403 (forbidden) - usually credential issue
+                    if (error.http_code === 403) {
+                        return reject(new AppError(status.INTERNAL_SERVER_ERROR, "Authentication failed with Cloudinary - Check API credentials in .env"));
+                    }
+                    
+                    return reject(new AppError(status.INTERNAL_SERVER_ERROR, `Failed to upload file to Cloudinary: ${error.message}`));
                 }
+                console.log("✅ File uploaded successfully to Cloudinary:", result?.secure_url);
                 resolve(result as UploadApiResponse);
             }
         ).end(buffer);
     })
-
-
 }
 
 export const deleteFileFromCloudinary = async (url: string) => {
@@ -82,6 +108,5 @@ export const deleteFileFromCloudinary = async (url: string) => {
         throw new AppError(status.INTERNAL_SERVER_ERROR, "Failed to delete file from Cloudinary");
     }
 }
-
 
 export const cloudinaryUpload = cloudinary;

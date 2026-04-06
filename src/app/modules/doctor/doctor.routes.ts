@@ -7,7 +7,7 @@ const router = Router();
 
 router.get(
   "/",
-  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+  // checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
   doctorController.getAllDoctor,
 );
 router.get(

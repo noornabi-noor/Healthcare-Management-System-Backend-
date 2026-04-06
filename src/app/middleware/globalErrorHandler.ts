@@ -12,8 +12,16 @@ export const globalErrorHandler = async (
   res: Response,
   next: NextFunction,
 ) => {
+  // Log full error details for debugging
   if (envVars.NODE_ENV === "development") {
-    console.log("Error from global error handler", err);
+    console.log("❌ Error from global error handler:");
+    console.log(JSON.stringify(err, null, 2));
+    
+    // Special logging for Cloudinary 403 errors
+    if (err.http_code === 403 || err.message?.includes("403")) {
+      console.error("🚨 CLOUDINARY 403 ERROR - This means your API credentials are INVALID or RESTRICTED");
+      console.error("   Please verify your credentials in .env file match your Cloudinary account");
+    }
   }
 
   if (req.file) {
