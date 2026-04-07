@@ -9,6 +9,7 @@ import path from "path";
 import cors from "cors";
 import { envVars } from "./app/config/env";
 import qs from "qs";
+import { paymentController } from "./app/modules/payment/payment.controller";
 
 const app : Application = express();
 app.use(express.urlencoded({extended: true}));
@@ -18,7 +19,7 @@ app.set("query parser", (str : string) => qs.parse(str));
 app.set("view engine", "ejs");
 app.set("views", path.resolve(process.cwd(), '/src/app/templates'));
 
-// app.post("/webhook", express.raw({ type: "application/json" }), PaymentController.handleStripeWebhookEvent)
+app.post("/webhook", express.raw({ type: "application/json" }), paymentController.handleStripeWebhookEvent)
 
 app.use(cors({
     origin : [envVars.FRONTEND_URL, envVars.BETTER_AUTH_URL, "http://localhost:3000", "http://localhost:5000"],
