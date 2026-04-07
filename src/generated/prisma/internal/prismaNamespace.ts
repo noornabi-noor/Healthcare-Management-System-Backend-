@@ -1946,7 +1946,7 @@ export type ScheduleScalarFieldEnum = (typeof ScheduleScalarFieldEnum)[keyof typ
 
 export const DoctorSchedulesScalarFieldEnum = {
   doctorId: 'doctorId',
-  schduleId: 'schduleId',
+  scheduleId: 'scheduleId',
   isBooked: 'isBooked',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
