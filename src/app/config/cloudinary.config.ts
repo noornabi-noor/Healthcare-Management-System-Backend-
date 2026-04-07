@@ -9,19 +9,6 @@ cloudinary.config({
     api_secret: envVars.CLOUDINARY.CLOUDINARY_API_SECRET,
 })
 
-// Log Cloudinary initialization status with actual values for debugging
-// if (process.env.NODE_ENV === "development") {
-//     const config = cloudinary.config();
-//     console.log("🔧 Cloudinary Configuration Debug:", {
-//         env_cloud_name: envVars.CLOUDINARY.CLOUDINARY_CLOUD_NAME,
-//         env_api_key: envVars.CLOUDINARY.CLOUDINARY_API_KEY?.slice(0, 5) + "...",
-//         env_api_secret: envVars.CLOUDINARY.CLOUDINARY_API_SECRET?.slice(0, 5) + "...",
-//         loaded_cloud_name: config.cloud_name,
-//         loaded_api_key: config.api_key?.slice(0, 5) + "...",
-//         has_api_secret: !!config.api_secret,
-//     });
-// }
-
 export const uploadFileToCloudinary = async (
     buffer: Buffer,
     fileName: string,
