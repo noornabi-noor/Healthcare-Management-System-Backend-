@@ -1,5 +1,5 @@
 import status from "http-status";
-import { UserStatus } from "../../../generated/prisma/enums";
+import { UserStatus, Role } from "../../../generated/prisma/enums";
 import AppError from "../../errorHelpers/AppError";
 import { auth } from "../../lib/auth";
 import { prisma } from "../../lib/prisma";
@@ -17,6 +17,7 @@ const registerPatient = async (payload: IRegisterPatientPayload) => {
       name,
       email,
       password,
+      role: Role.PATIENT,
     },
   });
 

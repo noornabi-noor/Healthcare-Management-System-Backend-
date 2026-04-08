@@ -4,6 +4,7 @@ import AppError from "../../errorHelpers/AppError";
 import { auth } from "../../lib/auth";
 import { prisma } from "../../lib/prisma";
 import { IDoctorCreatePayload } from "./user.interface";
+import { Role } from "../../../generated/prisma/enums";
 
 const createDoctor = async (payload: IDoctorCreatePayload) => {
   const specialties: Specialty[] = [];
@@ -43,6 +44,7 @@ const createDoctor = async (payload: IDoctorCreatePayload) => {
       name: payload.doctor.name,
       email: payload.doctor.email,
       password: payload.password,
+      role: Role.DOCTOR,
       needPasswordChanged: true,
     },
   });

@@ -47,7 +47,7 @@ const signInPatient = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     httpStatusCode: 201,
     success: true,
-    message: "Pateint login successfully",
+    message: "User login successfully",
     data: {
       token,
       accessToken,

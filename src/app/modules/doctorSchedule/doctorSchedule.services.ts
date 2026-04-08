@@ -8,6 +8,10 @@ import { ICreateDoctorSchedulePayload, IUpdateDoctorSchedulePayload } from "./do
 
 
 const createMyDoctorSchedule = async (user: IRequestUser, payload: ICreateDoctorSchedulePayload) => {
+    if (!payload.scheduleIds || !Array.isArray(payload.scheduleIds) || payload.scheduleIds.length === 0) {
+        throw new Error("scheduleIds must be a non-empty array");
+    }
+
     const doctorData = await prisma.doctor.findUniqueOrThrow({
         where: {
             email: user.email
@@ -34,7 +38,6 @@ const createMyDoctorSchedule = async (user: IRequestUser, payload: ICreateDoctor
             schedule: true
         }
     })
-
 
     return result;
 }
