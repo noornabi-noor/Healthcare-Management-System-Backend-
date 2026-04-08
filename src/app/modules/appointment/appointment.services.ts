@@ -31,7 +31,7 @@ const bookAppointment = async (payload : IBookAppointmentPayload, user : IReques
     }
    });
 
-   const doctorSchedule = await prisma.doctorSchedules.findUniqueOrThrow({
+   const doctorSchedule = await prisma.doctorSchedules.findUnique({
     where : {
         doctorId_scheduleId:{
             doctorId : doctorData.id,
@@ -39,6 +39,10 @@ const bookAppointment = async (payload : IBookAppointmentPayload, user : IReques
         }
     }
    });
+
+   if (!doctorSchedule) {
+    throw new AppError(status.NOT_FOUND, "The selected schedule is not available for this doctor. Please choose a valid doctor schedule.");
+   }
    
     const videoCallingId = String(uuidv7());
 
@@ -114,6 +118,23 @@ const bookAppointment = async (payload : IBookAppointmentPayload, user : IReques
         payment : result.paymentData,
         paymentUrl : result.paymentUrl,
     };
+}
+
+const getDoctorScheduleOrThrow = async (doctorId: string, scheduleId: string) => {
+    const doctorSchedule = await prisma.doctorSchedules.findUnique({
+        where: {
+            doctorId_scheduleId: {
+                doctorId,
+                scheduleId,
+            }
+        }
+    });
+
+    if (!doctorSchedule) {
+        throw new AppError(status.NOT_FOUND, "The selected schedule is not available for this doctor. Please choose a valid doctor schedule.");
+    }
+
+    return doctorSchedule;
 }
 
 const getMyAppointments = async (user: IRequestUser) => {
@@ -276,14 +297,7 @@ const bookAppointmentWithPayLater = async (payload : IBookAppointmentPayload, us
         }
     });
 
-    const doctorSchedule = await prisma.doctorSchedules.findUniqueOrThrow({
-        where: {
-            doctorId_scheduleId: {
-                doctorId: doctorData.id,
-                scheduleId: scheduleData.id,
-            }
-        }
-    });
+    const doctorSchedule = await getDoctorScheduleOrThrow(doctorData.id, scheduleData.id);
 
     const videoCallingId = String(uuidv7());
 
@@ -385,7 +399,6 @@ const initiatePayment = async (appointmentId: string, user : IRequestUser) => {
 
         success_url: `${envVars.FRONTEND_URL}/dashboard/payment/payment-success?appointment_id=${appointmentData.id}&payment_id=${appointmentData.payment.id}`,
 
-        // cancel_url: `${envVars.FRONTEND_URL}/dashboard/payment/payment-failed`,
         cancel_url: `${envVars.FRONTEND_URL}/dashboard/appointments?error=payment_cancelled`,
     })
 
