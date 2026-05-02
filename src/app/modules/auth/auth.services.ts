@@ -325,7 +325,7 @@ const forgetPassword = async (email: string) => {
     throw new AppError(status.NOT_FOUND, "User not found");
   }
 
-  await auth.api.requestPasswordResetEmailOTP({
+  await auth.api.forgetPasswordEmailOTP({
     body: {
       email,
     }
