@@ -39,13 +39,13 @@ export class IndexingService {
         )
         VALUES
         (
-            ${Prisma.raw("gen_random_uuid()")}
-            ${chunkKey},
+          ${Prisma.raw("gen_random_uuid()")},
+          ${chunkKey},
           ${sourceType},
           ${sourceId},
           ${sourceLabel || null},
           ${content},
-          ${JSON.stringify(metadata || {})} :: jsonb,
+          ${JSON.stringify(metadata || {})}::jsonb,
           CAST(${vectorLiteral} AS vector),
           NOW()
         )
@@ -93,8 +93,8 @@ export class IndexingService {
 
                 // format reviews
                 const reviewsText = doctor.reviews.map(
-                    (r) => `- Rating: ${r.rating}/5. Comment: ${r.comment}||"No comment"`,
-                );
+                    (r) => `- Rating: ${r.rating}/5. Comment: ${r.comment || "No comment"}`,
+                ).join("\n");
 
                 const content = `Doctor Name: ${doctor.name}
             Experience: ${doctor.experience} years

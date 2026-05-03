@@ -6,6 +6,7 @@ import { doctorRoutes } from "../modules/doctor/doctor.routes";
 import { scheduleRoutes } from "../modules/schedule/schedule.routes";
 import { DoctorScheduleRoutes } from "../modules/doctorSchedule/doctorSchedule.routes";
 import { appointmentRoutes } from "../modules/appointment/appointment.routes";
+import { RagRoutes } from "../modules/rag/rag.routes";
 
 const router = Router();
 
@@ -16,5 +17,6 @@ router.use("/doctors", doctorRoutes);
 router.use("/schedules", scheduleRoutes);
 router.use("/doctor-schedules", DoctorScheduleRoutes);
 router.use("/appointments", appointmentRoutes);
+router.use("/rag", RagRoutes);
 
 export const indexRoutes = router;

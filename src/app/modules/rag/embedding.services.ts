@@ -42,7 +42,8 @@ export class EmbeddingService {
 
             return data.data[0].embedding;
         } catch (error) {
-            console.log(error);
+            console.error("Error generating embedding:", error);
+            throw error;
         }
     }
 }
