@@ -29,7 +29,7 @@ interface EnvConfig {
   CLOUDINARY: {
     CLOUDINARY_CLOUD_NAME: string;
     CLOUDINARY_API_KEY: string;
-    CLOUDINARY_API_SECRET: string; 
+    CLOUDINARY_API_SECRET: string;
   },
   STRIPE: {
     STRIPE_SECRET_KEY: string;
@@ -37,6 +37,9 @@ interface EnvConfig {
   },
   SUPER_ADMIN_EMAIL: string;
   SUPER_ADMIN_PASSWORD: string;
+  OPENAI_API_KEY: string;
+  OPENAI_EMBEDDING_MODEL: string;
+  OPENAI_CHAT_MODEL: string;
 }
 
 const loadEnvVariables = (): EnvConfig => {
@@ -66,15 +69,14 @@ const loadEnvVariables = (): EnvConfig => {
     "STRIPE_SECRET_KEY",
     "STRIPE_WEBHOOK_SECRET",
     "SUPER_ADMIN_EMAIL",
-    "SUPER_ADMIN_PASSWORD"
+    "SUPER_ADMIN_PASSWORD",
+    "OPENAI_API_KEY",
+    "OPENAI_EMBEDDING_MODEL",
+    "OPENAI_CHAT_MODEL",
   ];
 
   requiredVariable.forEach((variable) => {
     if (!process.env[variable]) {
-      // throw new Error(
-      //   `Environment vaiable ${variable} is required but not set in .env file!`,
-      // );
-
       throw new AppError(
         status.INTERNAL_SERVER_ERROR,
         `Environment vaiable ${variable} is required but not set in .env file!`,
@@ -115,6 +117,9 @@ const loadEnvVariables = (): EnvConfig => {
     },
     SUPER_ADMIN_EMAIL: process.env.SUPER_ADMIN_EMAIL as string,
     SUPER_ADMIN_PASSWORD: process.env.SUPER_ADMIN_PASSWORD as string,
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY as string,
+    OPENAI_EMBEDDING_MODEL: process.env.OPENAI_EMBEDDING_MODEL as string,
+    OPENAI_CHAT_MODEL: process.env.OPENAI_CHAT_MODEL as string,
   };
 };
 
