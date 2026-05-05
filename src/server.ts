@@ -1,5 +1,6 @@
 import app from "./app";
 import { envVars } from "./app/config/env";
+import { redisService } from "./app/lib/redis";
 import { seedSuperAdmin } from "./app/utils/seedAdmin";
 // import { prisma } from "./lib/prisma";
 const port = envVars.PORT || 5000;
@@ -8,6 +9,7 @@ const bootstrap = async() => {
   try {
     await seedSuperAdmin();
     // await prisma.$connect();
+    await redisService.connect().catch(console.error);
     console.log("Connected to the database successfully!");
 
     app.listen(port, () => {
